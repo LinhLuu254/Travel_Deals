@@ -2,73 +2,72 @@ const { Firestore } = require('@google-cloud/firestore');
 const sgMail = require('@sendgrid/mail');
 require('dotenv').config();
 
+// Initialize Firestore 
+const db = new Firestore({
+    projectId: "sp24-cit412-llinh-traveldeals"
+});
+
+// Set up SendGrid with  API key
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 exports.sendDeals = async (event, context) => {
+
+    console.log("Event:", event);
+
+    const incomingData = Buffer.from(event.data, 'base64').toString('utf-8');
+
+    const parsedData = JSON.parse(incomingData);
+
+    console.log(`Decoded message: ${JSON.stringify(parsedData)}`);
     
-  const db = new Firestore({
-      projectId: "sp24-cit412-llinh-traveldeals"
-  });
+    // Extract regions and headline from the event
+    const headLine = parsedData.deal_headline;
+    const locations = parsedData.deal_location;
 
-  const subscriberRef = db.collection('subscribers');
-  const dealRef = db.collection('deals');
+    console.log(locations)
 
-  const subscribersSnapshot = await subscriberRef.get();
+    // Get subscribers collection reference
+    const subscriberRef = db.collection('subscribers');
 
-  if (subscribersSnapshot.empty) {
-      console.log('No matching documents.');
-      return;
-  }
+    // Query subscribers whose watch regions contain any of the specified regions
+    const subscribersSnapshot = await subscriberRef.where('watch_regions', 'array-contains-any', locations).get();
 
-  subscribersSnapshot.forEach(async doc => {
-    const subscriberData = doc.data();
-    const email = subscriberData.email_address;
-    const regions = subscriberData.watch_regions;
+    // If there are matching subscribers, send them deals via email
+    if (!subscribersSnapshot.empty) {
+        subscribersSnapshot.forEach(doc => {
+            const subscriberData = doc.data();
+            const email = subscriberData.email_address;
 
+            // Create email deal message
+            const deal = {
+                to: email,
+                from: process.env.SENDGRID_SENDER,
+                subject: headLine,
+                text: `Check out this exciting travel deal: ${headLine}`,
+                html: `<p>Check out this exciting travel deal from <i>Linh Luu</i>: <strong>${headLine}</strong></p>`
+            };
 
-    console.log(subscriberData);
-    console.log(email);
-    console.log(regions);
+            console.log(deal);
 
-    // Query deals that match subscriber's watch_regions
-    const dealsSnapshot = await dealRef.where('location', 'array-contains-any', regions).get();
-
-    if (!dealsSnapshot.empty) {
-      dealsSnapshot.forEach(dealDoc => {
-          const dealData = dealDoc.data();
-
-          console.log("Deal's data");
-          console.log(dealData);
-
-          // GET OUR API KEY
-          sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-          // CREATE AN EMAIL DEAL MESSAGE
-          const deal = {
-              to: email,
-              from: process.env.SENDGRID_SENDER,
-              subject: dealData.headline,
-              text: "Check out this exciting travel deal: " + dealData.headline,
-              html: "<p>Check out this exciting travel deal from TravelDeals: <strong>" + dealData.headline + "</strong></p>"
-          };
-
-          console.log('Deal');
-          console.log(deal)
-
-          // SEND THE DEAL THROUGH SENDGRID
-          sgMail.send(deal)
-              .then(() => {
-                  console.log("Email sent successfully.");
-              })
-              .catch(error => {
-                  console.error("Error sending email:", error);
-              });
-      });
+            // Send the deal through SendGrid
+            sgMail.send(deal)
+                .then(() => {
+                    console.log("Email sent successfully.");
+                })
+                .catch(error => {
+                    console.error("Error sending email:", error);
+                });
+        });
     } else {
-        console.log('No matching deals found for subscriber:', email);
+        console.log('No matching documents.');
     }
-
-
-   } )
-
-  
+   
 };
- C
+
+        
+        
+   
+
+   
+
+ 

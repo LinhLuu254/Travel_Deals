@@ -9,9 +9,8 @@ This is a Google Cloud Function triggered by a PubSub message to the topic `trav
 gcloud functions deploy send_email_welcome \
 --entry-point sendWelcome \
 --runtime nodejs18 \
---trigger-topic=travel_deals_signup \
+--trigger-topic=travel_deal \
 --no-gen2
 ```
-
 
 

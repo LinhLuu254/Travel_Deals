@@ -11,6 +11,12 @@ exports.sendWelcome = (message, context) => {
   console.log(`Decoded message: ${JSON.stringify(parsedMessage)}`);
   console.log(`Email address: ${parsedMessage.email_address}`);
 
+  const regions = parsedMessage.watch_region;
+  console.log(regions);
+
+  const string = regions.join(", ");
+
+
   // GET OUR API KEY
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -19,8 +25,8 @@ exports.sendWelcome = (message, context) => {
     to: parsedMessage.email_address,
     from: process.env.SENDGRID_SENDER,
     subject: "Thanks for signing up for TravelDeals!",
-    text: "Thanks for signing up. We can't wait to share deals with you.",
-    html: "Thanks for signing up. We can't wait to share <strong>awesome</strong> deals with you."
+    text: "Thanks for signing up for " + string + ". We can't wait to share deals with you.",
+    html: "Thanks for signing up for " + string + ". We can't wait to share <strong>awesome</strong> deals with you."
   };
 
   console.log('Message object');
