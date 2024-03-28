@@ -4,3 +4,10 @@ This is a Google Cloud Function triggered by a new document in the `deals` colle
 
 ## Deployment Command
 **Ensure you have an active Google Cloud Project**
+```
+gcloud functions deploy send_deals \
+--entry-point sendDeals \
+--runtime nodejs18 \
+--trigger-topic=travel_deals_signup \
+--no-gen2
+```

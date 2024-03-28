@@ -23,6 +23,9 @@ exports.sendWelcome = (message, context) => {
     html: "Thanks for signing up. We can't wait to share <strong>awesome</strong> deals with you."
   };
 
+  console.log('Message object');
+  console.log(msg);
+
   // SEND THE MESSAGE THROUGH SENDGRID
   sgMail
   .send(msg)

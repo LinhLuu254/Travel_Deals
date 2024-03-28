@@ -6,9 +6,12 @@ exports.writeSubscriber = async (message, context) => {
     const incomingMessage = Buffer.from(message.data, 'base64').toString('utf-8');
   
     const parsedMessage = JSON.parse(incomingMessage);
+
+    console.log (parsedMessage)
   
     console.log(`Decoded message: ${JSON.stringify(parsedMessage)}`);
     console.log(`Email address: ${parsedMessage.email_address}`); 
+    console.log(`Regions: ${parsedMessage.watch_region}`)
 
     // Construct document to be added to Firestore
     const subscriberData = {
