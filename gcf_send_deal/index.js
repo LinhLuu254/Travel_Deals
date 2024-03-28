@@ -42,7 +42,7 @@ exports.sendDeals = async (event, context) => {
             const deal = {
                 to: email,
                 from: process.env.SENDGRID_SENDER,
-                subject: headLine,
+                subject: "Linh Luu" + headLine,
                 text: `Check out this exciting travel deal: ${headLine}`,
                 html: `<p>Check out this exciting travel deal from <i>Linh Luu</i>: <strong>${headLine}</strong></p>`
             };
